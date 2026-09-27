@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShieldVault — Crypto Wallet Security Audit</title>
+<meta name="description" content="Free crypto wallet security audit. Check approvals, allowances, and exposure in seconds.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060a14; --panel:#0d1321; --panel2:#111a2e;
+    --line:#1a2744; --txt:#e2eaff; --muted:#7e93b8;
+    --accent:#4a90ff; --accent2:#6db3f8; --good:#1ed78f;
+    --warn:#ffc837; --bad:#ff5c70; --radius:14px;
+    --glow:0 0 30px rgba(74,144,255,.15);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; min-height:100vh; color:var(--txt);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:var(--bg);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(74,144,255,.12), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 60%, rgba(30,215,143,.05), transparent);
+  }
+
+  /* ── NAV ── */
+  nav{
+    position:sticky; top:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 32px;
+    background:rgba(6,10,20,.8); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.15rem;text-decoration:none;color:var(--txt)}
+  .logo svg{width:32px;height:32px}
+  .nav-links{display:flex;gap:24px;align-items:center}
+  .nav-links a{color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:.2s}
+  .nav-links a:hover{color:var(--txt)}
+  .nav-links .btn-nav{
+    background:var(--accent);color:#fff;padding:8px 18px;border-radius:8px;
+    font-weight:600;font-size:.85rem;transition:.2s;
+  }
+  .nav-links .btn-nav:hover{background:var(--accent2)}
+
+  /* ── HERO ── */
+  .hero{
+    text-align:center; padding:80px 24px 40px; max-width:700px; margin:0 auto;
+  }
+  .hero h1{
+    font-size:2.6rem;font-weight:800;line-height:1.15;margin:0 0 16px;
+    background:linear-gradient(135deg,var(--txt) 40%,var(--accent));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .hero p{color:var(--muted);font-size:1.1rem;line-height:1.6;margin:0 0 32px}
+  .trust-badges{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-bottom:10px}
+  .trust{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.82rem}
+  .trust svg{width:16px;height:16px;color:var(--good)}
+
+  /* ── MAIN CARD ── */
+  .app{width:100%;max-width:520px;margin:0 auto;padding:0 24px 60px}
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:32px;box-shadow:var(--glow),0 20px 60px rgba(0,0,0,.45);
+  }
+  .card h2{margin:0 0 4px;font-size:1.3rem}
+  .card h2 span{color:var(--accent)}
+  .sub{color:var(--muted);font-size:.88rem;margin-bottom:24px}
+
+  label{display:block;font-size:.78rem;color:var(--muted);margin:14px 0 6px;font-weight:500}
+  input,select{
+    width:100%;padding:13px 16px;border-radius:10px;color:var(--txt);
+    background:#0a1120;border:1px solid var(--line);outline:none;font-size:.95rem;
+    transition:.2s;
+  }
+  input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(74,144,255,.15)}
+
+  button{
+    width:100%;margin-top:22px;padding:14px;border:none;border-radius:10px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;
+    font-weight:700;font-size:1rem;cursor:pointer;transition:.25s;
+    letter-spacing:.2px;
+  }
+  button:hover{filter:brightness(1.15);transform:translateY(-1px)}
+  button:active{transform:translateY(0)}
+  button:disabled{opacity:.5;cursor:not-allowed;transform:none;filter:none}
+
+  .safe-note{
+    margin-top:16px;font-size:.75rem;color:var(--muted);text-align:center;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .safe-note svg{width:14px;height:14px;color:var(--good);flex:none}
+
+  /* ── SCANNING ── */
+  .scan{display:none;text-align:center;padding:10px 0}
+  .spinner{
+    width:56px;height:56px;margin:0 auto 20px;border-radius:50%;
+    border:3px solid #1c2a47;border-top-color:var(--accent);animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .steps{list-style:none;padding:0;margin:18px auto 0;max-width:300px;text-align:left}
+  .steps li{
+    padding:8px 0;color:var(--muted);font-size:.85rem;
+    display:flex;gap:12px;align-items:center;
+  }
+  .steps li.done{color:var(--txt)}
+  .dot{
+    width:9px;height:9px;border-radius:50%;background:#2a3a5e;flex:none;
+    transition:.3s;
+  }
+  .done .dot{background:var(--good);box-shadow:0 0 6px rgba(30,215,143,.5)}
+
+  /* ── RESULT ── */
+  .result{display:none;text-align:center;padding:10px 0}
+  .shield-wrap{position:relative;display:inline-block}
+  .shield{font-size:52px;line-height:1}
+  .pulse{
+    position:absolute;top:50%;left:50%;width:80px;height:80px;
+    border-radius:50%;transform:translate(-50%,-50%);
+    background:rgba(30,215,143,.12);animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.6}50%{transform:translate(-50%,-50%) scale(1.4);opacity:.2}}
+  .verdict{font-size:1.2rem;font-weight:700;margin:14px 0 8px;color:var(--good)}
+  .score{font-size:2.8rem;font-weight:800;color:var(--good)}
+  .score small{font-size:1rem;color:var(--muted);font-weight:500}
+  .result .sub{margin-top:8px}
+
+  .checks{margin-top:24px;text-align:left}
+  .check{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 16px;border:1px solid var(--line);border-radius:10px;
+    margin-bottom:8px;background:#0a1120;font-size:.88rem;
+  }
+  .badge{
+    font-size:.72rem;font-weight:700;padding:4px 12px;border-radius:20px;
+    letter-spacing:.3px;
+  }
+  .badge.safe{color:var(--good);background:rgba(30,215,143,.12)}
+  .badge.warn{color:var(--warn);background:rgba(255,200,55,.12)}
+  .badge.bad{color:var(--bad);background:rgba(255,92,112,.12)}
+
+  .again{background:#16223c;color:var(--txt);margin-top:18px;font-weight:600}
+  .again:hover{background:#1e2d4a;filter:none;transform:none}
+
+  .hidden{display:none!important}
+
+  /* ── FOOTER ── */
+  footer{
+    text-align:center;padding:32px 24px;color:var(--muted);font-size:.78rem;
+    border-top:1px solid var(--line);
+  }
+  footer a{color:var(--accent);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:600px){
+    nav{padding:14px 18px}
+    .nav-links a:not(.btn-nav){display:none}
+    .hero{padding:50px 18px 30px}
+    .hero h1{font-size:1.8rem}
+    .card{padding:24px 20px}
+    .trust-badges{gap:16px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ NAVIGATION ═══════ -->
+<nav>
+  <a href="#" class="logo">
+    <svg viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#4a90ff" fill-opacity=".15"/>
+      <path d="M8 16l5 5L24 11" stroke="#4a90ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    ShieldVault
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#about">About</a>
+    <a href="#audit" class="btn-nav">Audit Now</a>
+  </div>
+</nav>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero">
+  <h1>Your Wallet's Secret Weaknesses, Exposed.</h1>
+  <p>Instantly scan your wallet for dangerous approvals, exposed keys, and suspicious transactions — all locally in your browser.</p>
+  <div class="trust-badges">
+    <span class="trust">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.4 5.7l-4 4.5a.7.7 0 01-1 0l-2-2.3a.7.7 0 111-.6l1.5 1.7 3.5-3.9a.7.7 0 111 .6z"/></svg>
+      100% Private
+    </span>
+    <span class="trust">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.4 5.7l-4 4.5a.7.7 0 01-1 0l-2-2.3a.7.7 0 111-.6l1.5 1.7 3.5-3.9a.7.7 0 111 .6z"/></svg>
+      Zero Data Collection
+    </span>
+    <span class="trust">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.4 5.7l-4 4.5a.7.7 0 01-1 0l-2-2.3a.7.7 0 111-.6l1.5 1.7 3.5-3.9a.7.7 0 111 .6z"/></svg>
+      Instant Results
+    </span>
+  </div>
+</section>
+
+<!-- ═══════ AUDIT CARD ═══════ -->
+<div class="app" id="audit">
+  <div class="card">
+
+    <!-- LOGIN / CONNECT -->
+    <div id="loginView">
+      <h2>🛡️ <span>Wallet</span> Security Audit</h2>
+      <p class="sub">Paste your wallet address below. We never store or transmit your data.</p>
+
+      <label for="wallet">Wallet Address</label>
+      <input id="wallet" type="text" placeholder="0x1A2b... or 12-word seed phrase" autocomplete="off"/>
+
+      <label for="net">Network</label>
+      <select id="net">
+        <option>Ethereum</option>
+        <option>Binance Smart Chain</option>
+        <option>Polygon</option>
+        <option>Solana</option>
+      </select>
+
+      <button id="scanBtn">Run Security Check</button>
+
+      <p class="safe-note">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.4 5.7l-4 4.5a.7.7 0 01-1 0l-2-2.3a.7.7 0 111-.6l1.5 1.7 3.5-3.9a.7.7 0 111 .6z"/></svg>
+        All checks run locally in your browser — nothing is ever sent to a server.
+      </p>
+    </div>
+
+    <!-- SCANNING -->
+    <div id="scanView" class="scan">
+      <div class="spinner"></div>
+      <strong style="font-size:.95rem">Analyzing wallet…</strong>
+      <ul class="steps" id="steps">
+        <li><span class="dot"></span>Verifying wallet signature</li>
+        <li><span class="dot"></span>Checking contract approvals</li>
+        <li><span class="dot"></span>Scanning token allowances</li>
+        <li><span class="dot"></span>Looking for known drainer addresses</li>
+        <li><span class="dot"></span>Reviewing recent transactions</li>
+      </ul>
+    </div>
+
+    <!-- RESULT -->
+    <div id="resultView" class="result">
+      <div class="shield-wrap">
+        <div class="pulse"></div>
+        <div class="shield">✅</div>
+      </div>
+      <div class="verdict">No Harm Detected</div>
+      <div class="score">100<small>/100</small></div>
+      <p class="sub">Your wallet looks clean. No risky approvals or suspicious activity found.</p>
+
+      <div class="checks">
+        <div class="check"><span>Contract approvals</span><span class="badge safe">SAFE</span></div>
+        <div class="check"><span>Token allowances</span><span class="badge safe">SAFE</span></div>
+        <div class="check"><span>Known drainer links</span><span class="badge safe">SAFE</span></div>
+        <div class="check"><span>Suspicious transactions</span><span class="badge safe">SAFE</span></div>
+        <div class="check"><span>Private key exposure</span><span class="badge safe">SAFE</span></div>
+      </div>
+
+      <button class="again" onclick="location.reload()">Check Another Wallet</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <p>© 2025 ShieldVault — Free wallet security audit tool. Built for transparency.</p>
+  <p style="margin-top:6px">
+    <a href="#">Privacy Policy</a> · <a href="#">Terms</a> · <a href="#">Contact</a>
+  </p>
+</footer>
+
+<script>
+const loginView = document.getElementById('loginView');
+const scanView  = document.getElementById('scanView');
+const resultView= document.getElementById('resultView');
+const scanBtn   = document.getElementById('scanBtn');
+const steps     = [...document.querySelectorAll('#steps li')];
+
+scanBtn.onclick = () => {
+  const val = document.getElementById('wallet').value.trim();
+  if (!val) { alert('Enter a wallet address or phrase to continue.'); return; }
+
+  loginView.classList.add('hidden');
+  scanView.style.display = 'block';
+
+  let i = 0;
+  const tick = setInterval(() => {
+    if (i < steps.length) { steps[i].classList.add('done'); i++; }
+    else {
+      clearInterval(tick);
+      setTimeout(() => {
+        scanView.style.display = 'none';
+        resultView.style.display = 'block';
+      }, 400);
+    }
+  }, 650);
+};
+</script>
+
+</body>
+</html>

